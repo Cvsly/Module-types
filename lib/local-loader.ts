@@ -121,3 +121,16 @@ function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> & { 
   let match;
 
   while ((match = regex.exec(comment)) !== null) {
+    const [, key, value] = match;
+
+    if (key === 'tags') {
+      meta[key] = value.split(',').map((t: string) => t.trim()).filter(Boolean);
+    } else if (key === 'size') {
+      meta[key] = value.trim() as any;
+    } else {
+      meta[key] = value.trim();
+    }
+  }
+
+  return meta;
+}
