@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 移除 distDir，使用默认的 .next
+  // distDir: 'dist',
+  
   output: 'export',
-  distDir: 'dist',
   trailingSlash: true,
   
   // 图片配置
