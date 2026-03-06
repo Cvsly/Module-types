@@ -4,8 +4,13 @@ import { loadAllWidgets } from '@/lib/github-loader';
 import { WidgetConfig } from '@/types/widget';
 import { ArrowRight, RefreshCw, Github, AlertCircle } from 'lucide-react';
 
-// 强制动态渲染，每次请求都获取最新数据
-export const dynamic = 'force-dynamic';
+// 使用 ISR 替代 force-dynamic，每 60 秒重新生成
+export const revalidate = 60;
+
+// 静态导出时需要 generateStaticParams，但首页不需要参数，所以留空
+export async function generateStaticParams() {
+  return [{}];
+}
 
 export default async function Home() {
   let widgets: WidgetConfig[] = [];
