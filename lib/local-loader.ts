@@ -6,7 +6,7 @@ import path from 'path';
  * 加载本地widgets目录下的所有模块
  */
 export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
-  const widgetsDir = path.join(process.cwd(), 'widgets');
+  const widgetsDir = path.join(process.cwd(), 'public', 'widgets');
   const widgets: WidgetConfig[] = [];
   // 获取部署的基础URL，默认是本地开发地址
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
