@@ -13,14 +13,21 @@ export async function getWidgetFiles(): Promise<GitHubContentItem[]> {
         'Accept': 'application/vnd.github.v3+json',
         'User-Agent': 'Forward-Hub-App'
       },
-      next: { revalidate: 3600 }
+      next: { revalidate: 60 }
     });
     
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.status}`);
     }
     
-    const data: GitHubContentItem[] = await response.json();
+    const data = await response.json();
+    
+    // 确保返回数组
+    if (!Array.isArray(data)) {
+      console.error('GitHub API returned non-array:', data);
+      return [];
+    }
+    
     return data.filter((item) => 
       item.type === 'file' && 
       (item.name.endsWith('.fwd') || item.name.endsWith('.js')) &&
@@ -28,31 +35,7 @@ export async function getWidgetFiles(): Promise<GitHubContentItem[]> {
     );
   } catch (error) {
     console.error('Error fetching widget files:', error);
-    // 备用：直接返回已知文件
-    return [
-      {
-        name: 'AllInOne.fwd',
-        path: 'widgets/AllInOne.fwd',
-        sha: '',
-        size: 0,
-        url: '',
-        html_url: '',
-        git_url: '',
-        download_url: `${GITHUB_RAW_BASE}/AllInOne.fwd`,
-        type: 'file'
-      },
-      {
-        name: 'ai.js',
-        path: 'widgets/ai.js',
-        sha: '',
-        size: 0,
-        url: '',
-        html_url: '',
-        git_url: '',
-        download_url: `${GITHUB_RAW_BASE}/ai.js`,
-        type: 'file'
-      }
-    ] as GitHubContentItem[];
+    return [];
   }
 }
 
@@ -62,25 +45,33 @@ export async function getWidgetFiles(): Promise<GitHubContentItem[]> {
 export async function loadFwdCollection(url: string, filename: string): Promise<WidgetConfig[]> {
   try {
     const response = await fetch(url, { 
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
       headers: { 'Accept': 'application/json' }
     });
     
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
     
     const collection: FwdCollection = await response.json();
     
+    // 验证数据结构
+    if (!collection.widgets || !Array.isArray(collection.widgets)) {
+      console.error(`Invalid .fwd file ${filename}: missing widgets array`);
+      return [];
+    }
+    
     return collection.widgets.map((widget, index) => ({
       id: `fwd-${filename.replace('.fwd', '')}-${index}`,
-      name: widget.name,
-      description: widget.description,
-      category: widget.category,
-      icon: widget.icon,
-      author: widget.author,
-      version: widget.version,
-      config: widget.config,
-      size: widget.size,
-      tags: widget.tags,
+      name: widget.name || `未命名模块${index + 1}`,
+      description: widget.description || '',
+      category: widget.category || 'custom',
+      icon: widget.icon || 'Box',
+      author: widget.author || 'Unknown',
+      version: widget.version || '1.0.0',
+      config: widget.config || {},
+      size: widget.size || 'medium',
+      tags: Array.isArray(widget.tags) ? widget.tags : [],
       downloads: 0,
       createdAt: new Date().toISOString(),
       sourceUrl: url,
@@ -99,11 +90,13 @@ export async function loadFwdCollection(url: string, filename: string): Promise<
 export async function loadJsModule(url: string, filename: string): Promise<WidgetConfig | null> {
   try {
     const response = await fetch(url, { 
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
       headers: { 'Accept': 'text/plain' }
     });
     
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
     
     const code = await response.text();
     const meta = parseJsMeta(code, filename);
@@ -123,7 +116,7 @@ export async function loadJsModule(url: string, filename: string): Promise<Widge
         filename: filename
       },
       size: meta.size || 'medium',
-      tags: meta.tags || ['脚本', 'JS'],
+      tags: Array.isArray(meta.tags) ? meta.tags : ['脚本', 'JS'],
       downloads: 0,
       createdAt: meta.createdAt || new Date().toISOString(),
       sourceUrl: url,
@@ -139,7 +132,7 @@ export async function loadJsModule(url: string, filename: string): Promise<Widge
 /**
  * 解析 JS 文件头部的元数据注释
  */
-function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> {
+function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> & { [key: string]: any } {
   const meta: Partial<WidgetConfig> & { [key: string]: any } = {};
   
   // 匹配多行注释 /** ... */
@@ -156,9 +149,9 @@ function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> {
     const [, key, value] = match;
     
     if (key === 'tags') {
-      meta[key] = value.split(',').map(t => t.trim()).filter(Boolean);
+      meta[key] = value.split(',').map((t: string) => t.trim()).filter(Boolean);
     } else if (key === 'size') {
-      meta[key] = value as any;
+      meta[key] = value.trim() as any;
     } else {
       meta[key] = value.trim();
     }
@@ -172,24 +165,36 @@ function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> {
  */
 export async function loadAllWidgets(): Promise<WidgetConfig[]> {
   const files = await getWidgetFiles();
+  
+  if (files.length === 0) {
+    console.log('No widget files found');
+    return [];
+  }
+  
   const widgets: WidgetConfig[] = [];
   
   for (const file of files) {
     if (!file.download_url) continue;
     
-    if (file.name.endsWith('.fwd')) {
-      const collection = await loadFwdCollection(file.download_url, file.name);
-      widgets.push(...collection);
-    } else if (file.name.endsWith('.js')) {
-      const module = await loadJsModule(file.download_url, file.name);
-      if (module) widgets.push(module);
+    try {
+      if (file.name.endsWith('.fwd')) {
+        const collection = await loadFwdCollection(file.download_url, file.name);
+        widgets.push(...collection);
+      } else if (file.name.endsWith('.js')) {
+        const module = await loadJsModule(file.download_url, file.name);
+        if (module) widgets.push(module);
+      }
+    } catch (e) {
+      console.error(`Failed to load ${file.name}:`, e);
     }
   }
   
-  // 排序：合集在前，然后按名称
+  // 安全排序，确保 name 存在
   return widgets.sort((a, b) => {
+    const nameA = a.name || '';
+    const nameB = b.name || '';
     if (a.type !== b.type) return a.type === 'fwd' ? -1 : 1;
-    return a.name.localeCompare(b.name);
+    return nameA.localeCompare(nameB);
   });
 }
 
