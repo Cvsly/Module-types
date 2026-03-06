@@ -1,7 +1,6 @@
-import { WidgetConfig, FwdCollection, GitHubContentItem } from '@/types/widget';
+import { WidgetConfig, GitHubContentItem } from '@/types/widget';
 
 const GITHUB_API_BASE = 'https://api.github.com/repos/Cvsly/Module-widgets';
-const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/Cvsly/Module-widgets/main/widgets';
 
 /**
  * 获取目录下所有文件列表
@@ -22,7 +21,6 @@ export async function getWidgetFiles(): Promise<GitHubContentItem[]> {
     
     const data = await response.json();
     
-    // 确保返回数组
     if (!Array.isArray(data)) {
       console.error('GitHub API returned non-array:', data);
       return [];
@@ -41,6 +39,10 @@ export async function getWidgetFiles(): Promise<GitHubContentItem[]> {
 
 /**
  * 加载 .fwd 合集文件
+ * 支持多种格式:
+ * 1. {widgets: [...]} - 标准格式
+ * 2. [...] - 直接是数组
+ * 3. {name, modules: [...]} - 其他变体
  */
 export async function loadFwdCollection(url: string, filename: string): Promise<WidgetConfig[]> {
   try {
@@ -53,25 +55,36 @@ export async function loadFwdCollection(url: string, filename: string): Promise<
       throw new Error(`HTTP ${response.status}`);
     }
     
-    const collection: FwdCollection = await response.json();
+    const data = await response.json();
+    let widgetsArray: any[] = [];
     
-    // 验证数据结构
-    if (!collection.widgets || !Array.isArray(collection.widgets)) {
-      console.error(`Invalid .fwd file ${filename}: missing widgets array`);
+    // 处理不同格式
+    if (Array.isArray(data)) {
+      // 直接是数组
+      widgetsArray = data;
+    } else if (data.widgets && Array.isArray(data.widgets)) {
+      // 标准格式 {widgets: [...]}
+      widgetsArray = data.widgets;
+    } else if (data.modules && Array.isArray(data.modules)) {
+      // 变体 {modules: [...]}
+      widgetsArray = data.modules;
+    } else {
+      console.error(`Unknown .fwd file structure in ${filename}:`, Object.keys(data));
       return [];
     }
     
-    return collection.widgets.map((widget, index) => ({
+    return widgetsArray.map((widget, index) => ({
       id: `fwd-${filename.replace('.fwd', '')}-${index}`,
-      name: widget.name || `未命名模块${index + 1}`,
-      description: widget.description || '',
-      category: widget.category || 'custom',
-      icon: widget.icon || 'Box',
-      author: widget.author || 'Unknown',
-      version: widget.version || '1.0.0',
-      config: widget.config || {},
+      name: widget.name || widget.title || `模块${index + 1}`,
+      description: widget.description || widget.desc || '',
+      category: widget.category || widget.type || 'custom',
+      icon: widget.icon || widget.iconName || 'Box',
+      author: widget.author || widget.creator || 'Unknown',
+      version: widget.version || widget.ver || '1.0.0',
+      config: widget.config || widget.data || widget,
       size: widget.size || 'medium',
-      tags: Array.isArray(widget.tags) ? widget.tags : [],
+      tags: Array.isArray(widget.tags) ? widget.tags : 
+            Array.isArray(widget.tag) ? widget.tag : [],
       downloads: 0,
       createdAt: new Date().toISOString(),
       sourceUrl: url,
@@ -135,13 +148,10 @@ export async function loadJsModule(url: string, filename: string): Promise<Widge
 function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> & { [key: string]: any } {
   const meta: Partial<WidgetConfig> & { [key: string]: any } = {};
   
-  // 匹配多行注释 /** ... */
   const commentMatch = code.match(/\/\*\*([\s\S]*?)\*\//);
   if (!commentMatch) return meta;
   
   const comment = commentMatch[1];
-  
-  // 提取 @key value 格式
   const regex = /@(\w+)\s+(.+)/g;
   let match;
   
@@ -189,7 +199,6 @@ export async function loadAllWidgets(): Promise<WidgetConfig[]> {
     }
   }
   
-  // 安全排序，确保 name 存在
   return widgets.sort((a, b) => {
     const nameA = a.name || '';
     const nameB = b.name || '';
@@ -198,9 +207,6 @@ export async function loadAllWidgets(): Promise<WidgetConfig[]> {
   });
 }
 
-/**
- * 根据 ID 获取单个模块
- */
 export async function getWidgetById(id: string): Promise<WidgetConfig | null> {
   const widgets = await loadAllWidgets();
   return widgets.find(w => w.id === id) || null;
