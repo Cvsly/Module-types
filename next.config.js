@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  distDir: 'dist',
-  trailingSlash: true,
+  // 移除 output: 'export'，使用默认 SSR 模式
+  // output: 'export',
+  // distDir: 'dist',  // 也移除，使用默认 .next
   
   images: {
     unoptimized: true,
@@ -18,10 +18,6 @@ const nextConfig = {
     ],
   },
 
-  async redirects() {
-    return [];
-  },
-
   async headers() {
     return [
       {
@@ -30,10 +26,6 @@ const nextConfig = {
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
           },
           {
             key: 'X-Content-Type-Options',
