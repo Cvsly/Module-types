@@ -19,18 +19,8 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
       // .fwd 合集 - 直接传递下载链接
       url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
     } else {
-      // .js 脚本 - 尝试传递base64编码的代码
-      try {
-        const response = await fetch(widget.sourceUrl);
-        const code = await response.text();
-        // 将代码转换为base64编码
-        const base64Code = btoa(unescape(encodeURIComponent(code)));
-        url = `forward://widget?code=${base64Code}&name=${encodeURIComponent(widget.name)}`;
-      } catch (error) {
-        console.error('获取模块代码失败:', error);
-        // 如果获取失败，使用原来的URL方式
-        url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
-      }
+      // .js 脚本 - 直接使用URL方式导入，不需要base64编码
+      url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
     }
     
     // 创建a标签来唤起App
