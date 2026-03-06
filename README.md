@@ -1,0 +1,1 @@
+NEXT_PUBLIC_BASE_URL=部署后的域名
