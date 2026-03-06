@@ -1,6 +1,6 @@
 import { Header } from '@/components/Header';
 import { WidgetGrid } from '@/components/WidgetGrid';
-import { loadAllWidgets } from '@/lib/github-loader';
+import { loadLocalWidgets } from '@/lib/local-loader';
 import { WidgetConfig } from '@/types/widget';
 import { ArrowRight, RefreshCw, Github, AlertCircle } from 'lucide-react';
 // 使用 ISR 替代 force-dynamic，每 60 秒重新生成
@@ -13,7 +13,7 @@ export default async function Home() {
   let error: string | null = null;
   
   try {
-    widgets = await loadAllWidgets();
+    widgets = await loadLocalWidgets();
   } catch (err) {
     error = err instanceof Error ? err.message : '加载失败';
   }
