@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
+  "outputDirectory": "dist",
   "framework": "nextjs",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
@@ -30,7 +30,7 @@
         },
         {
           "key": "X-Frame-Options",
-          value: "DENY"
+          "value": "DENY"
         }
       ]
     }
