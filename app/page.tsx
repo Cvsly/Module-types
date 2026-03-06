@@ -1,16 +1,15 @@
 import { Header } from '@/components/Header';
 import { WidgetGrid } from '@/components/WidgetGrid';
 import { loadAllWidgets } from '@/lib/github-loader';
-import { ArrowRight, RefreshCw, Github } from 'lucide-react';
+import { WidgetConfig } from '@/types/widget';
+import { ArrowRight, RefreshCw, Github, AlertCircle } from 'lucide-react';
 
 // 强制动态渲染，每次请求都获取最新数据
 export const dynamic = 'force-dynamic';
-// 或者使用 revalidate
-// export const revalidate = 3600; // 1小时 ISR
 
 export default async function Home() {
-  let widgets = [];
-  let error = null;
+  let widgets: WidgetConfig[] = [];
+  let error: string | null = null;
   
   try {
     widgets = await loadAllWidgets();
@@ -50,8 +49,11 @@ export default async function Home() {
 
         {/* 错误提示 */}
         {error && (
-          <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 text-center">
-            加载模块失败: {error}
+          <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+            <div className="flex items-center gap-2 text-red-700 dark:text-red-300">
+              <AlertCircle className="w-5 h-5" />
+              <span>加载模块失败: {error}</span>
+            </div>
           </div>
         )}
 
