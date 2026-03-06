@@ -1,16 +1,6 @@
-export type WidgetCategory = 
-  | 'douban' 
-  | 'trakt' 
-  | 'tv' 
-  | 'calendar' 
-  | 'danmu' 
-  | 'custom' 
-  | 'ai' 
-  | 'tool';
-
+export type WidgetCategory = string;
 export type WidgetSize = 'small' | 'medium' | 'large';
 export type WidgetType = 'fwd' | 'js';
-
 export interface WidgetConfig {
   // 基础信息
   id: string;
@@ -35,7 +25,6 @@ export interface WidgetConfig {
   type: WidgetType;
   filename: string;
 }
-
 export interface FwdCollection {
   name: string;
   version: string;
@@ -53,7 +42,6 @@ export interface FwdCollection {
     tags: string[];
   }>;
 }
-
 // GitHub API 响应类型
 export interface GitHubContentItem {
   name: string;
