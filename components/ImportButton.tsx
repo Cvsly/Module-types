@@ -14,31 +14,21 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
 
   const handleImport = async () => {
     let url: string;
-    
+
     if (widget.type === 'fwd') {
-      // .fwd 合集 - 直接传递下载链接
-      url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
+      // .fwd 合集 - 使用正确的URL Scheme格式
+      url = `forward://import?url=${encodeURIComponent(widget.sourceUrl)}&type=collection&name=${encodeURIComponent(widget.name)}`;
     } else {
-      // .js 脚本 - 尝试传递base64编码的代码
-      try {
-        const response = await fetch(widget.sourceUrl);
-        const code = await response.text();
-        // 将代码转换为base64编码
-        const base64Code = btoa(unescape(encodeURIComponent(code)));
-        url = `forward://widget?code=${base64Code}&name=${encodeURIComponent(widget.name)}`;
-      } catch (error) {
-        console.error('获取模块代码失败:', error);
-        // 如果获取失败，使用原来的URL方式
-        url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
-      }
+      // .js 脚本 - 直接使用URL方式导入，不使用base64编码
+      url = `forward://import?url=${encodeURIComponent(widget.sourceUrl)}&type=script&name=${encodeURIComponent(widget.name)}`;
     }
-    
+
     // 创建a标签来唤起App
     const link = document.createElement('a');
     link.href = url;
     link.style.display = 'none';
     document.body.appendChild(link);
-    
+
     // 设置超时，处理唤起失败的情况
     const timeout = setTimeout(() => {
       document.body.removeChild(link);
@@ -53,13 +43,13 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
       // 3秒后隐藏提示
       setTimeout(() => setShowToast(false), 3000);
     }, 1000);
-    
+
     // 监听点击事件，当唤起成功时清除超时
     const handleClick = () => {
       clearTimeout(timeout);
       document.body.removeChild(link);
     };
-    
+
     link.addEventListener('click', handleClick);
     // 模拟点击
     link.click();
