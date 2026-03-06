@@ -1,19 +1,39 @@
+export type WidgetCategory = 
+  | 'douban' 
+  | 'trakt' 
+  | 'tv' 
+  | 'calendar' 
+  | 'danmu' 
+  | 'custom' 
+  | 'ai' 
+  | 'tool';
+
+export type WidgetSize = 'small' | 'medium' | 'large';
+export type WidgetType = 'fwd' | 'js';
+
 export interface WidgetConfig {
+  // 基础信息
   id: string;
   name: string;
   description: string;
-  category: 'douban' | 'trakt' | 'tv' | 'calendar' | 'danmu' | 'custom' | 'ai' | 'tool';
+  category: WidgetCategory;
   icon: string;
+  
+  // 版本信息
   author: string;
   version: string;
+  createdAt: string;
+  
+  // 配置数据
   config: Record<string, any>;
-  size: 'small' | 'medium' | 'large';
+  size: WidgetSize;
   tags: string[];
   downloads: number;
-  createdAt: string;
-  sourceUrl: string;      // GitHub raw 链接
-  type: 'fwd' | 'js';     // 文件类型
-  filename: string;        // 原始文件名
+  
+  // 来源信息
+  sourceUrl: string;
+  type: WidgetType;
+  filename: string;
 }
 
 export interface FwdCollection {
@@ -21,5 +41,30 @@ export interface FwdCollection {
   version: string;
   author: string;
   description: string;
-  widgets: WidgetConfig[];
+  widgets: Array<{
+    name: string;
+    description: string;
+    category: WidgetCategory;
+    icon: string;
+    author: string;
+    version: string;
+    config: Record<string, any>;
+    size: WidgetSize;
+    tags: string[];
+  }>;
+}
+
+// GitHub API 响应类型
+export interface GitHubContentItem {
+  name: string;
+  path: string;
+  sha: string;
+  size: number;
+  url: string;
+  html_url: string;
+  git_url: string;
+  download_url: string | null;
+  type: 'file' | 'dir';
+  content?: string;
+  encoding?: string;
 }
