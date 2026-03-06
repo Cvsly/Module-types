@@ -1,3 +1,5 @@
+'use client';
+
 import { Sparkles, Github, RefreshCw } from 'lucide-react';
 
 export function Header() {
