@@ -23,11 +23,10 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
       const sourceUrl = `${baseUrl}/widgets/${file}`;
 
       if (file.endsWith('.fwd')) {
-        // 加载.fwd合集，将每个模块拆分为单独的WidgetConfig
+        // 加载.fwd合集
         const content = fs.readFileSync(filePath, 'utf-8');
         const data = JSON.parse(content);
         let widgetsArray: any[] = [];
-
         // 处理不同格式
         if (Array.isArray(data)) {
           widgetsArray = data;
@@ -39,33 +38,25 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
           console.error(`Unknown .fwd file structure in ${file}:`, Object.keys(data));
           continue;
         }
-
-        // 将合集中的每个模块拆分为单独的WidgetConfig
-        for (let i = 0; i < widgetsArray.length; i++) {
-          const widget = widgetsArray[i];
-          const widgetConfig: WidgetConfig = {
-            id: `fwd-${file.replace('.fwd', '')}-${i}`,
-            name: widget.name || widget.title || `模块${i + 1}`,
-            description: widget.description || widget.desc || '',
-            category: widget.category || widget.type || 'custom',
-            icon: widget.icon || widget.iconName || 'Box',
-            author: widget.author || widget.creator || 'Unknown',
-            version: widget.version || widget.ver || '1.0.0',
-            config: widget.config || widget.data || widget,
-            size: widget.size || 'medium',
-            tags: Array.isArray(widget.tags) ? widget.tags :
-                  Array.isArray(widget.tag) ? widget.tag : [],
-            downloads: 0,
-            createdAt: stats.birthtime.toISOString(),
-            sourceUrl: sourceUrl, // 保留合集的URL，或者可以传递单个模块的信息
-            type: 'fwd' as WidgetType,
-            filename: file,
-            // 添加合集标识，用于区分是合集中的模块
-            isCollection: true,
-            collectionIndex: i
-          };
-          widgets.push(widgetConfig);
-        }
+        const collectionWidgets = widgetsArray.map((widget, index) => ({
+          id: `fwd-${file.replace('.fwd', '')}-${index}`,
+          name: widget.name || widget.title || `模块${index + 1}`,
+          description: widget.description || widget.desc || '',
+          category: widget.category || widget.type || 'custom',
+          icon: widget.icon || widget.iconName || 'Box',
+          author: widget.author || widget.creator || 'Unknown',
+          version: widget.version || widget.ver || '1.0.0',
+          config: widget.config || widget.data || widget,
+          size: widget.size || 'medium',
+          tags: Array.isArray(widget.tags) ? widget.tags :
+                Array.isArray(widget.tag) ? widget.tag : [],
+          downloads: 0,
+          createdAt: stats.birthtime.toISOString(),
+          sourceUrl: sourceUrl,
+          type: 'fwd' as WidgetType,
+          filename: file
+        }));
+        widgets.push(...collectionWidgets);
       } else if (file.endsWith('.js')) {
         // 加载.js模块
         const content = fs.readFileSync(filePath, 'utf-8');
