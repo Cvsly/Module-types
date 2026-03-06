@@ -57,11 +57,12 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
                   Array.isArray(widget.tag) ? widget.tag : [],
             downloads: 0,
             createdAt: stats.birthtime.toISOString(),
-            sourceUrl: sourceUrl, // 保留合集的URL，或者可以传递单个模块的信息
+            sourceUrl: sourceUrl,
             type: 'fwd' as WidgetType,
             filename: file,
-            // 添加合集标识，用于区分是合集中的模块
+            // 标识这是合集中的模块
             isCollection: true,
+            // 模块在合集中的索引
             collectionIndex: i
           };
           widgets.push(widgetConfig);
@@ -120,16 +121,3 @@ function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> & { 
   let match;
 
   while ((match = regex.exec(comment)) !== null) {
-    const [, key, value] = match;
-
-    if (key === 'tags') {
-      meta[key] = value.split(',').map((t: string) => t.trim()).filter(Boolean);
-    } else if (key === 'size') {
-      meta[key] = value.trim() as any;
-    } else {
-      meta[key] = value.trim();
-    }
-  }
-
-  return meta;
-}
