@@ -10,7 +10,6 @@ import {
   Code,
   Box,
   FileJson,
-  Download,
   ExternalLink
 } from 'lucide-react';
 
@@ -20,9 +19,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 interface WidgetCardProps {
   widget: WidgetConfig;
+  viewMode?: 'grid' | 'list';
 }
 
-export function WidgetCard({ widget }: WidgetCardProps) {
+export function WidgetCard({ widget, viewMode = 'grid' }: WidgetCardProps) {
   const Icon = iconMap[widget.icon] || (widget.type === 'fwd' ? Box : Code);
 
   const categoryColors: Record<string, string> = {
@@ -35,6 +35,59 @@ export function WidgetCard({ widget }: WidgetCardProps) {
     custom: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
   };
 
+  // 列表视图
+  if (viewMode === 'list') {
+    return (
+      <div className="group flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all">
+        {/* 图标 */}
+        <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+          <Icon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+        </div>
+
+        {/* 内容 */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+              {widget.name}
+            </h3>
+            <span className={`px-2 py-0.5 rounded text-xs ${categoryColors[widget.category] || categoryColors.custom}`}>
+              {widget.category}
+            </span>
+            <span className={`px-2 py-0.5 rounded text-xs ${
+              widget.type === 'fwd' 
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
+                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
+            }`}>
+              {widget.type === 'fwd' ? '合集' : 'JS'}
+            </span>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+            {widget.description}
+          </p>
+          <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+            <span className="font-mono">{widget.filename}</span>
+            <span>v{widget.version}</span>
+            <span>{widget.author}</span>
+          </div>
+        </div>
+
+        {/* 操作 */}
+        <div className="flex items-center gap-2">
+          <ImportButton widget={widget} className="px-4 py-2 text-sm" />
+          <a
+            href={widget.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
+            <ExternalLink className="w-5 h-5" />
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // 网格视图
   return (
     <div className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300">
       {/* 预览区域 */}
