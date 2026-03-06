@@ -68,30 +68,6 @@ const nextConfig = {
       },
     ];
   },
-
-  // 配置输出目录，确保widgets目录被复制到输出目录
-  async exportPathMap() {
-    const pathMap = {};
-    pathMap['/'] = { page: '/' };
-    
-    // 读取widgets目录下的所有文件，添加到静态资源路径
-    const fs = require('fs');
-    const path = require('path');
-    const widgetsDir = path.join(process.cwd(), 'widgets');
-    if (fs.existsSync(widgetsDir)) {
-      const files = fs.readdirSync(widgetsDir);
-      for (const file of files) {
-        if (fs.statSync(path.join(widgetsDir, file)).isFile()) {
-          pathMap[`/widgets/${file}`] = { 
-            page: '/widgets/[file]', 
-            query: { file: file } 
-          };
-        }
-      }
-    }
-    
-    return pathMap;
-  },
 };
 
 module.exports = nextConfig;
