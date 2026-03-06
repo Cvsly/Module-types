@@ -1,12 +1,16 @@
 import { WidgetConfig, WidgetType } from '@/types/widget';
 import fs from 'fs';
 import path from 'path';
+
 /**
  * 加载本地widgets目录下的所有模块
  */
 export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
   const widgetsDir = path.join(process.cwd(), 'widgets');
   const widgets: WidgetConfig[] = [];
+  // 获取部署的基础URL，默认是本地开发地址
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  
   try {
     // 读取目录下的所有文件
     const files = fs.readdirSync(widgetsDir);
@@ -14,6 +18,10 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
       const filePath = path.join(widgetsDir, file);
       const stats = fs.statSync(filePath);
       if (!stats.isFile()) continue;
+
+      // 使用部署域名+文件路径作为sourceUrl
+      const sourceUrl = `${baseUrl}/widgets/${file}`;
+
       if (file.endsWith('.fwd')) {
         // 加载.fwd合集
         const content = fs.readFileSync(filePath, 'utf-8');
@@ -40,11 +48,11 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
           version: widget.version || widget.ver || '1.0.0',
           config: widget.config || widget.data || widget,
           size: widget.size || 'medium',
-          tags: Array.isArray(widget.tags) ? widget.tags : 
+          tags: Array.isArray(widget.tags) ? widget.tags :
                 Array.isArray(widget.tag) ? widget.tag : [],
           downloads: 0,
           createdAt: stats.birthtime.toISOString(),
-          sourceUrl: `file://${filePath}`,
+          sourceUrl: sourceUrl,
           type: 'fwd' as WidgetType,
           filename: file
         }));
@@ -71,7 +79,7 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
           tags: Array.isArray(meta.tags) ? meta.tags : ['脚本', 'JS'],
           downloads: 0,
           createdAt: stats.birthtime.toISOString(),
-          sourceUrl: `file://${filePath}`,
+          sourceUrl: sourceUrl,
           type: 'js' as WidgetType,
           filename: file
         };
@@ -88,22 +96,23 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
     return nameA.localeCompare(nameB);
   });
 }
+
 /**
  * 解析 JS 文件头部的元数据注释
  */
 function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> & { [key: string]: any } {
   const meta: Partial<WidgetConfig> & { [key: string]: any } = {};
-  
+
   const commentMatch = code.match(/\/\*\*([\s\S]*?)\*\//);
   if (!commentMatch) return meta;
-  
+
   const comment = commentMatch[1];
   const regex = /@(\w+)\s+(.+)/g;
   let match;
-  
+
   while ((match = regex.exec(comment)) !== null) {
     const [, key, value] = match;
-    
+
     if (key === 'tags') {
       meta[key] = value.split(',').map((t: string) => t.trim()).filter(Boolean);
     } else if (key === 'size') {
@@ -112,6 +121,6 @@ function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> & { 
       meta[key] = value.trim();
     }
   }
-  
+
   return meta;
 }
