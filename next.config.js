@@ -1,9 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  // 移除 output: 'export'，使用默认 SSR 模式
+  // output: 'export',
+  // distDir: 'dist',  // 也移除，使用默认 .next
+
+  images: {
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+      },
+    ],
+  },
+
   // 配置静态资源目录
-  staticPageGenerationTimeout: 1000,
-  // 将widgets目录作为静态资源目录
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -14,9 +29,34 @@ const nextConfig = {
     }
     return config;
   },
-  // 配置静态资源路径
+
   async headers() {
     return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
       {
         source: '/widgets/:path*',
         headers: [
@@ -28,14 +68,10 @@ const nextConfig = {
       },
     ];
   },
-  // 配置静态资源目录
-  images: {
-    unoptimized: true,
-  },
+
   // 配置输出目录，确保widgets目录被复制到输出目录
   async exportPathMap() {
     const pathMap = {};
-    // 添加首页
     pathMap['/'] = { page: '/' };
     
     // 读取widgets目录下的所有文件，添加到静态资源路径
