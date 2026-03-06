@@ -3,14 +3,11 @@ import { WidgetGrid } from '@/components/WidgetGrid';
 import { loadAllWidgets } from '@/lib/github-loader';
 import { WidgetConfig } from '@/types/widget';
 import { ArrowRight, RefreshCw, Github, AlertCircle } from 'lucide-react';
-
 // 使用 ISR 替代 force-dynamic，每 60 秒重新生成
 export const revalidate = 60;
-
 export async function generateStaticParams() {
   return [{}];
 }
-
 export default async function Home() {
   let widgets: WidgetConfig[] = [];
   let error: string | null = null;
@@ -20,7 +17,6 @@ export default async function Home() {
   } catch (err) {
     error = err instanceof Error ? err.message : '加载失败';
   }
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Header />
@@ -28,19 +24,12 @@ export default async function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero */}
         <section className="text-center mb-12">
-
           
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Forward 模块中心
           </h1>
           
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
-            直接从 GitHub 仓库加载 .fwd 合集和 .js 脚本，一键导入 Forward App
-          </p>
-
-
         </section>
-
         {/* 错误提示 */}
         {error && (
           <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
@@ -50,7 +39,6 @@ export default async function Home() {
             </div>
           </div>
         )}
-
         {/* 模块网格 */}
         <section>
           <div className="flex items-center justify-between mb-6">
@@ -61,7 +49,6 @@ export default async function Home() {
               </span>
             </h2>
             
-
           </div>
           
           {widgets.length > 0 ? (
@@ -72,11 +59,8 @@ export default async function Home() {
             </div>
           ) : null}
         </section>
-
         {/* 使用说明部分已删除 */}
       </main>
-
-
     </div>
   );
 }
