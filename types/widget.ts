@@ -21,4 +21,3 @@ export interface WidgetConfig {
 }
 
 export type WidgetType = 'fwd' | 'js';
-EOF
