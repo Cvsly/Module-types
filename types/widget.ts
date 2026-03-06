@@ -1,4 +1,3 @@
-cat > /home/user/.super_doubao/super-doubao-runtime/workspace/Module-types/types/widget.ts << 'EOF'
 export interface WidgetConfig {
   id: string;
   name: string;
