@@ -1,4 +1,4 @@
-import { WidgetConfig } from '@/types/widget';
+import { WidgetConfig, WidgetType } from '@/types/widget';
 import fs from 'fs';
 import path from 'path';
 /**
@@ -45,7 +45,7 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
           downloads: 0,
           createdAt: stats.birthtime.toISOString(),
           sourceUrl: `file://${filePath}`,
-          type: 'fwd',
+          type: 'fwd' as WidgetType,
           filename: file
         }));
         widgets.push(...collectionWidgets);
@@ -72,7 +72,7 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
           downloads: 0,
           createdAt: stats.birthtime.toISOString(),
           sourceUrl: `file://${filePath}`,
-          type: 'js',
+          type: 'js' as WidgetType,
           filename: file
         };
         widgets.push(widget);
