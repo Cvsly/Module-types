@@ -1,32 +1,20 @@
 'use client';
-
 import { useState, useMemo } from 'react';
 import { WidgetConfig } from '@/types/widget';
 import { WidgetCard } from './WidgetCard';
 import { Search, Grid3X3, List, Filter, FileJson, Code } from 'lucide-react';
-
 interface WidgetGridProps {
   widgets: WidgetConfig[];
 }
-
 const categories = [
   { id: 'all', name: '全部' },
   { id: 'fwd', name: '合集' },
-  { id: 'js', name: '脚本' },
-  { id: 'douban', name: '豆瓣' },
-  { id: 'trakt', name: 'Trakt' },
-  { id: 'tv', name: '直播' },
-  { id: 'danmu', name: '弹幕' },
-  { id: 'ai', name: 'AI' },
-  { id: 'tool', name: '工具' },
-  { id: 'custom', name: '其他' }
+  { id: 'js', name: '模块' }
 ];
-
 export function WidgetGrid({ widgets }: WidgetGridProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
   const filteredWidgets = useMemo(() => {
     return widgets.filter((widget) => {
       const matchesSearch = 
@@ -37,21 +25,17 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
       
       const matchesCategory = selectedCategory === 'all' 
         ? true 
-        : selectedCategory === 'fwd' || selectedCategory === 'js'
-          ? widget.type === selectedCategory
-          : widget.category === selectedCategory;
+        : widget.type === selectedCategory;
       
       return matchesSearch && matchesCategory;
     });
   }, [widgets, searchQuery, selectedCategory]);
-
   // 统计
   const stats = useMemo(() => ({
     total: widgets.length,
     fwd: widgets.filter(w => w.type === 'fwd').length,
     js: widgets.filter(w => w.type === 'js').length
   }), [widgets]);
-
   return (
     <div className="space-y-6">
       {/* 搜索和筛选栏 */}
@@ -67,7 +51,6 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white transition-all"
           />
         </div>
-
         {/* 分类筛选 */}
         <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 no-scrollbar">
           <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -88,7 +71,6 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
             </button>
           ))}
         </div>
-
         {/* 视图切换 */}
         <div className="flex items-center gap-2 border-l border-gray-200 dark:border-gray-700 pl-4">
           <button
@@ -113,7 +95,6 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
           </button>
         </div>
       </div>
-
       {/* 结果统计 */}
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>
@@ -126,11 +107,10 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
           </span>
           <span className="flex items-center gap-1">
             <Code className="w-4 h-4 text-emerald-500" />
-            脚本 {stats.js}
+            模块 {stats.js}
           </span>
         </div>
       </div>
-
       {/* 网格布局 */}
       <div className={`grid gap-6 ${
         viewMode === 'grid' 
@@ -141,7 +121,6 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
           <WidgetCard key={widget.id} widget={widget} viewMode={viewMode} />
         ))}
       </div>
-
       {/* 空状态 */}
       {filteredWidgets.length === 0 && (
         <div className="text-center py-20">
