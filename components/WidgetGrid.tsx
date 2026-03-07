@@ -3,39 +3,74 @@ import { useState, useMemo } from 'react';
 import { WidgetConfig } from '@/types/widget';
 import { WidgetCard } from './WidgetCard';
 import { Search, Grid3X3, List, Filter, FileJson, Code } from 'lucide-react';
+
 interface WidgetGridProps {
   widgets: WidgetConfig[];
 }
-const categories = [
-  { id: 'all', name: '全部' },
-  { id: 'fwd', name: '合集' },
-  { id: 'js', name: '模块' }
-];
+
 export function WidgetGrid({ widgets }: WidgetGridProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // 动态生成分类：全部 + 各个合集分类 + 模块
+  const categories = useMemo(() => {
+    // 提取所有fwd模块的合集title，去重并断言为字符串数组
+    const fwdCategories = (Array.from(new Set(widgets.filter(w => w.type === 'fwd').map(w => w.collectionTitle)))
+      .filter(Boolean)) as string[];
+    // 统计每个分类的数量
+    const categoryCounts = widgets.reduce((acc, widget) => {
+      if (widget.type === 'fwd') {
+        const key = widget.collectionTitle || widget.category;
+        acc[key] = (acc[key] || 0) + 1;
+      } else if (widget.type === 'js') {
+        acc['js'] = (acc['js'] || 0) + 1;
+      }
+      acc['all'] = (acc['all'] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // 构建分类数组
+    return [
+      { id: 'all', name: '全部', count: categoryCounts['all'] || 0 },
+      ...fwdCategories.map(cat => ({
+        id: cat,
+        name: cat,
+        count: categoryCounts[cat] || 0
+      })),
+      { id: 'js', name: '模块', count: categoryCounts['js'] || 0 }
+    ];
+  }, [widgets]);
+
   const filteredWidgets = useMemo(() => {
     return widgets.filter((widget) => {
-      const matchesSearch = 
+      const matchesSearch =
         widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         widget.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         widget.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
         widget.filename.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesCategory = selectedCategory === 'all' 
-        ? true 
-        : widget.type === selectedCategory;
-      
+
+      let matchesCategory = true;
+      if (selectedCategory === 'all') {
+        matchesCategory = true;
+      } else if (selectedCategory === 'js') {
+        matchesCategory = widget.type === 'js';
+      } else {
+        // 匹配对应的合集分类
+        matchesCategory = widget.collectionTitle === selectedCategory;
+      }
+
       return matchesSearch && matchesCategory;
     });
   }, [widgets, searchQuery, selectedCategory]);
+
   // 统计
   const stats = useMemo(() => ({
     total: widgets.length,
     fwd: widgets.filter(w => w.type === 'fwd').length,
     js: widgets.filter(w => w.type === 'js').length
   }), [widgets]);
+
   return (
     <div className="space-y-6">
       {/* 搜索和筛选栏 */}
@@ -65,9 +100,7 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
               }`}
             >
               {cat.name}
-              {cat.id === 'all' && <span className="ml-1 text-xs opacity-60">({stats.total})</span>}
-              {cat.id === 'fwd' && <span className="ml-1 text-xs opacity-60">({stats.fwd})</span>}
-              {cat.id === 'js' && <span className="ml-1 text-xs opacity-60">({stats.js})</span>}
+              <span className="ml-1 text-xs opacity-60">({cat.count})</span>
             </button>
           ))}
         </div>
@@ -76,8 +109,8 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
           <button
             onClick={() => setViewMode('grid')}
             className={`p-2 rounded-lg transition-colors ${
-              viewMode === 'grid' 
-                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400' 
+              viewMode === 'grid'
+                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
                 : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
             }`}
           >
@@ -86,8 +119,8 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
           <button
             onClick={() => setViewMode('list')}
             className={`p-2 rounded-lg transition-colors ${
-              viewMode === 'list' 
-                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400' 
+              viewMode === 'list'
+                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
                 : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
             }`}
           >
@@ -113,8 +146,8 @@ export function WidgetGrid({ widgets }: WidgetGridProps) {
       </div>
       {/* 网格布局 */}
       <div className={`grid gap-6 ${
-        viewMode === 'grid' 
-          ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+        viewMode === 'grid'
+          ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
           : 'grid-cols-1'
       }`}>
         {filteredWidgets.map((widget) => (
