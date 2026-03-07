@@ -1,4 +1,3 @@
-cat > /home/user/.super_doubao/super-doubao-runtime/workspace/Module-types/lib/local-loader.ts << 'EOF'
 import { WidgetConfig, WidgetType } from '@/types/widget';
 import fs from 'fs';
 import path from 'path';
@@ -148,4 +147,3 @@ function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> & { 
 
   return meta;
 }
-EOF
