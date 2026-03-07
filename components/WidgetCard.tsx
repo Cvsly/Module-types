@@ -1,4 +1,3 @@
-cat > /home/user/.super_doubao/super-doubao-runtime/workspace/Module-types/components/WidgetCard.tsx << 'EOF'
 import { WidgetConfig } from '@/types/widget';
 import { ImportButton } from './ImportButton';
 import {
@@ -110,7 +109,7 @@ export function WidgetCard({ widget, viewMode = 'grid' }: WidgetCardProps) {
           {widget.description}
         </p>
 
-        {/* 文件信息 */}
+        {/* 文件信息 - 只保留版本号 */}
         <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 mb-4 p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
           <span>v{widget.version}</span>
         </div>
@@ -121,4 +120,3 @@ export function WidgetCard({ widget, viewMode = 'grid' }: WidgetCardProps) {
     </div>
   );
 }
-EOF
