@@ -10,7 +10,7 @@ interface ImportButtonProps {
 export function ImportButton({ widget, className = '' }: ImportButtonProps) {
   const handleImport = () => {
     let url: string;
-    
+
     if (widget.type === 'fwd' && widget.isCollection) {
       // 合集中的单个模块 - 直接使用原sourceUrl
       url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
@@ -21,16 +21,16 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
       // .js 脚本 - 直接使用URL方式导入
       url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
     }
-    
+
     // 创建a标签来唤起App
     const link = document.createElement('a');
     link.href = url;
     link.style.display = 'none';
     document.body.appendChild(link);
-    
+
     // 模拟点击
     link.click();
-    
+
     // 移除a标签
     document.body.removeChild(link);
   };
