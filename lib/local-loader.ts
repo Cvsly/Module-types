@@ -1,3 +1,4 @@
+cat > /home/user/.super_doubao/super-doubao-runtime/workspace/Module-types/lib/local-loader.ts << 'EOF'
 import { WidgetConfig, WidgetType } from '@/types/widget';
 import fs from 'fs';
 import path from 'path';
@@ -43,6 +44,19 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
         // 将合集中的每个模块拆分为单独的WidgetConfig
         for (let i = 0; i < widgetsArray.length; i++) {
           const widget = widgetsArray[i];
+          // 优先使用模块自己的sourceUrl，如果没有则使用合集URL+参数
+          let moduleSourceUrl = widget.sourceUrl || widget.url;
+          if (!moduleSourceUrl) {
+            // 如果模块有code字段，转换为base64 data URL
+            if (widget.code) {
+              const base64Code = btoa(unescape(encodeURIComponent(widget.code)));
+              moduleSourceUrl = `data:text/javascript;base64,${base64Code}`;
+            } else {
+              // 否则使用合集URL+参数
+              moduleSourceUrl = `${sourceUrl}?index=${i}`;
+            }
+          }
+
           const widgetConfig: WidgetConfig = {
             id: `fwd-${file.replace('.fwd', '')}-${i}`,
             name: widget.name || widget.title || `模块${i + 1}`,
@@ -57,7 +71,7 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
                   Array.isArray(widget.tag) ? widget.tag : [],
             downloads: 0,
             createdAt: stats.birthtime.toISOString(),
-            sourceUrl: sourceUrl,
+            sourceUrl: moduleSourceUrl,
             type: 'fwd' as WidgetType,
             filename: file,
             // 标识这是合集中的模块
@@ -134,3 +148,4 @@ function parseJsMeta(code: string, filename: string): Partial<WidgetConfig> & { 
 
   return meta;
 }
+EOF
