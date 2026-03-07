@@ -17,16 +17,19 @@ export default async function Home() {
   
   try {
     widgets = await loadLocalWidgets();
+    console.log('Loaded widgets:', widgets);
+    console.log('JS widgets count:', widgets.filter(w => w.type === 'js').length);
   } catch (err) {
     error = err instanceof Error ? err.message : '加载失败';
+    console.error('Error loading widgets:', err);
   }
-
   // 获取所有.fwd合集文件的URL
   const widgetsDir = path.join(process.cwd(), 'public', 'widgets');
   const fwdFiles = fs.readdirSync(widgetsDir).filter(file => file.endsWith('.fwd'));
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const fwdUrls = fwdFiles.map(file => `${baseUrl}/widgets/${file}`);
-
+  console.log('Found fwd files:', fwdFiles);
+  console.log('Found js files:', fs.readdirSync(widgetsDir).filter(file => file.endsWith('.js')));
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Header />
@@ -38,6 +41,9 @@ export default async function Home() {
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Forward 模块中心
           </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            总模块数: {widgets.length}，JS模块数: {widgets.filter(w => w.type === 'js').length}
+          </p>
           
         </section>
         {/* 错误提示 */}
