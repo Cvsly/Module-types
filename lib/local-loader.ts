@@ -1,7 +1,6 @@
 import { WidgetConfig, WidgetType } from '@/types/widget';
 import fs from 'fs';
 import path from 'path';
-
 /**
  * 加载本地widgets目录下的所有模块
  */
@@ -26,42 +25,13 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
           const content = fs.readFileSync(filePath, 'utf-8');
           const data = JSON.parse(content);
           let widgetsArray: any[] = [];
-          // 获取合集的title作为分类名称
-          let collectionTitle = file.replace('.fwd', ''); // 默认用文件名
-          let collectionIcon = 'Box';
-          let collectionAuthor = 'Unknown';
-          let collectionVersion = '1.0.0';
           // 处理不同格式
           if (Array.isArray(data)) {
             widgetsArray = data;
           } else if (data.widgets && Array.isArray(data.widgets)) {
             widgetsArray = data.widgets;
-            // 读取合集的元数据
-            if (data.title) collectionTitle = data.title;
-            if (data.icon) collectionIcon = data.icon;
-            if (data.author) collectionAuthor = data.author;
-            if (data.version) collectionVersion = data.version;
-            // 兼容meta字段的情况
-            if (data.meta) {
-              if (data.meta.title) collectionTitle = data.meta.title;
-              if (data.meta.icon) collectionIcon = data.meta.icon;
-              if (data.meta.author) collectionAuthor = data.meta.author;
-              if (data.meta.version) collectionVersion = data.meta.version;
-            }
           } else if (data.modules && Array.isArray(data.modules)) {
             widgetsArray = data.modules;
-            // 读取合集的元数据
-            if (data.title) collectionTitle = data.title;
-            if (data.icon) collectionIcon = data.icon;
-            if (data.author) collectionAuthor = data.author;
-            if (data.version) collectionVersion = data.version;
-            // 兼容meta字段的情况
-            if (data.meta) {
-              if (data.meta.title) collectionTitle = data.meta.title;
-              if (data.meta.icon) collectionIcon = data.meta.icon;
-              if (data.meta.author) collectionAuthor = data.meta.author;
-              if (data.meta.version) collectionVersion = data.meta.version;
-            }
           } else {
             console.error(`Unknown .fwd file structure in ${file}:`, Object.keys(data));
             continue;
@@ -79,10 +49,10 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
               id: `fwd-${file.replace('.fwd', '')}-${i}`,
               name: widget.name || widget.title || `模块${i + 1}`,
               description: widget.description || widget.desc || '',
-              category: widget.category || widget.type || collectionTitle,
-              icon: widget.icon || widget.iconName || collectionIcon,
-              author: widget.author || widget.creator || collectionAuthor,
-              version: widget.version || widget.ver || collectionVersion,
+              category: widget.category || widget.type || 'custom',
+              icon: widget.icon || widget.iconName || 'Box',
+              author: widget.author || widget.creator || 'Unknown',
+              version: widget.version || widget.ver || '1.0.0',
               config: widget.config || widget.data || widget,
               size: widget.size || 'medium',
               tags: Array.isArray(widget.tags) ? widget.tags :
@@ -95,9 +65,7 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
               // 标识这是合集中的模块
               isCollection: true,
               // 模块在合集中的索引
-              collectionIndex: i,
-              // 添加合集的title字段
-              collectionTitle: collectionTitle
+              collectionIndex: i
             };
             widgets.push(widgetConfig);
           }
@@ -146,7 +114,6 @@ export async function loadLocalWidgets(): Promise<WidgetConfig[]> {
     return nameA.localeCompare(nameB);
   });
 }
-
 /**
  * 解析 JS 文件头部的元数据注释
  */
