@@ -1,4 +1,3 @@
-cat > /home/user/.super_doubao/super-doubao-runtime/workspace/Module-types/components/ImportButton.tsx << 'EOF'
 'use client';
 import { Download } from 'lucide-react';
 import { WidgetConfig } from '@/types/widget';
@@ -104,4 +103,3 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
     </>
   );
 }
-EOF
