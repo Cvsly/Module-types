@@ -17,7 +17,7 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
 
     if (widget.type === 'fwd') {
       // .fwd 合集 - 使用正确的URL Scheme格式
-      url = `forward://import?url=${encodeURIComponent(widget.sourceUrl)}&type=collection&name=${encodeURIComponent(widget.name)}`;
+      url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}&type=collection&name=${encodeURIComponent(widget.name)}`;
     } else {
       // .js 脚本 - 尝试传递base64编码的代码
       try {
@@ -25,11 +25,11 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
         const code = await response.text();
         // 将代码转换为base64编码
         const base64Code = btoa(unescape(encodeURIComponent(code)));
-        url = `forward://import?code=${base64Code}&type=script&name=${encodeURIComponent(widget.name)}`;
+        url = `forward://widget?code=${base64Code}&type=script&name=${encodeURIComponent(widget.name)}`;
       } catch (error) {
         console.error('获取模块代码失败:', error);
         // 如果获取失败，使用原来的URL方式
-        url = `forward://import?url=${encodeURIComponent(widget.sourceUrl)}&type=script&name=${encodeURIComponent(widget.name)}`;
+        url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}&type=script&name=${encodeURIComponent(widget.name)}`;
       }
     }
 
