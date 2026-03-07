@@ -1,12 +1,10 @@
 'use client';
 import { Download } from 'lucide-react';
 import { WidgetConfig } from '@/types/widget';
-
 interface ImportButtonProps {
   widget: WidgetConfig;
   className?: string;
 }
-
 export function ImportButton({ widget, className = '' }: ImportButtonProps) {
   const handleImport = () => {
     // 所有模块都直接使用自己的sourceUrl导入
@@ -24,17 +22,13 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
     // 移除a标签
     document.body.removeChild(link);
   };
-
   return (
     <button
       onClick={handleImport}
       className={`group relative inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 ${className}`}
     >
       <Download className="w-5 h-5 group-hover:animate-bounce" />
-      <span>导入 Forward</span>
-      <span className="ml-2 px-2 py-0.5 bg-white/20 rounded text-xs">
-        {widget.isCollection ? '合集模块' : widget.type === 'fwd' ? '合集' : '模块'}
-      </span>
+      <span>添加</span>
     </button>
   );
 }
