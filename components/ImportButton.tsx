@@ -2,12 +2,10 @@
 import { Download } from 'lucide-react';
 import { WidgetConfig } from '@/types/widget';
 
-
 interface ImportButtonProps {
   widget: WidgetConfig;
   className?: string;
 }
-
 
 export function ImportButton({ widget, className = '' }: ImportButtonProps) {
   const handleImport = () => {
@@ -37,7 +35,6 @@ export function ImportButton({ widget, className = '' }: ImportButtonProps) {
     // 移除a标签
     document.body.removeChild(link);
   };
-
 
   return (
     <button
