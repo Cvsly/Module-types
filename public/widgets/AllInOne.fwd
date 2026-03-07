@@ -438,6 +438,15 @@
       "url": "https://raw.githubusercontent.com/ocd0711/forward_module/master/widgets/unknow.baranwang.xvideos.js"
     },
     {
+      "id": "video_together",
+      "title": "Video Together(一起看)",
+      "description": "和朋友们一起看视频插件，支持同步播放、在线聊天等功能。",
+      "requiredVersion": "0.0.1",
+      "version": "1.0.1",
+      "author": "Video Together & magch",
+      "url": "https://raw.githubusercontent.com/Cvsly/Forward/refs/heads/main/Widgets/together.js"
+    },
+    {
       "id": "movie_paradise",
       "title": "在线影院",
       "description": "获取在线电影、电视剧、动漫、综艺和短剧",
