@@ -9,19 +9,8 @@ interface ImportButtonProps {
 
 export function ImportButton({ widget, className = '' }: ImportButtonProps) {
   const handleImport = () => {
-    let url: string;
-    
-    if (widget.type === 'fwd' && widget.isCollection) {
-      // 合集中的单个模块 - 将参数放在URL的查询参数中
-      const moduleUrl = `${widget.sourceUrl}?index=${widget.collectionIndex}&name=${encodeURIComponent(widget.name)}`;
-      url = `forward://widget?url=${encodeURIComponent(moduleUrl)}`;
-    } else if (widget.type === 'fwd') {
-      // .fwd 合集 - 直接传递下载链接
-      url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
-    } else {
-      // .js 脚本 - 直接使用URL方式导入
-      url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
-    }
+    // 所有模块都直接使用自己的sourceUrl导入
+    const url = `forward://widget?url=${encodeURIComponent(widget.sourceUrl)}`;
     
     // 创建a标签来唤起App
     const link = document.createElement('a');
