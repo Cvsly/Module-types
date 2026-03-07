@@ -1,8 +1,11 @@
 import { Header } from '@/components/Header';
 import { WidgetGrid } from '@/components/WidgetGrid';
+import { ImportAllFwdButton } from '@/components/ImportAllFwdButton';
 import { loadLocalWidgets } from '@/lib/local-loader';
 import { WidgetConfig } from '@/types/widget';
 import { ArrowRight, RefreshCw, Github, AlertCircle } from 'lucide-react';
+import fs from 'fs';
+import path from 'path';
 // 使用 ISR 替代 force-dynamic，每 60 秒重新生成
 export const revalidate = 60;
 export async function generateStaticParams() {
@@ -17,6 +20,13 @@ export default async function Home() {
   } catch (err) {
     error = err instanceof Error ? err.message : '加载失败';
   }
+
+  // 获取所有.fwd合集文件的URL
+  const widgetsDir = path.join(process.cwd(), 'public', 'widgets');
+  const fwdFiles = fs.readdirSync(widgetsDir).filter(file => file.endsWith('.fwd'));
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const fwdUrls = fwdFiles.map(file => `${baseUrl}/widgets/${file}`);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Header />
@@ -48,7 +58,7 @@ export default async function Home() {
                 {widgets.length}
               </span>
             </h2>
-            
+            <ImportAllFwdButton fwdUrls={fwdUrls} />
           </div>
           
           {widgets.length > 0 ? (
