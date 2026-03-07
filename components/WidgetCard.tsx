@@ -21,93 +21,109 @@ interface WidgetCardProps {
   viewMode?: 'grid' | 'list';
 }
 
+// 生成更明显的iOS风格彩色半透明背景，适配浅色页面
+const getRandomIosGlassColor = () => {
+  const hue = Math.floor(Math.random() * 360);
+  // 提高饱和度，降低亮度，让彩色更明显，在浅色背景上清晰可见
+  return `hsl(${hue}, 65%, 75%)`;
+};
+
 export function WidgetCard({ widget, viewMode = 'grid' }: WidgetCardProps) {
   const Icon = iconMap[widget.icon] || (widget.type === 'fwd' ? Box : Code);
+  const randomIosColor = getRandomIosGlassColor();
 
   // 列表视图
   if (viewMode === 'list') {
     return (
-      <div className="group flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all">
+      <div 
+        className="group flex items-center gap-4 p-4 rounded-xl hover:shadow-lg hover:shadow-current/25 transition-all border border-gray-200/60"
+        style={{
+          backgroundColor: `${randomIosColor}85`, // 85%透明度，让颜色更明显
+          backdropFilter: 'blur(12px)',
+        }}
+      >
         {/* 图标 */}
-        <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-          <Icon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+        <div className="w-12 h-12 bg-white/80 rounded-lg flex items-center justify-center flex-shrink-0 backdrop-blur-sm shadow-sm">
+          <Icon className="w-6 h-6 text-gray-700" />
         </div>
-
         {/* 内容 */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-              {widget.name} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">v{widget.version}</span>
+            <h3 className="font-semibold text-gray-800 truncate">
+              {widget.name} <span className="text-sm font-normal text-gray-600">v{widget.version}</span>
             </h3>
-            <span className={`px-2 py-0.5 rounded text-xs ${
-              widget.type === 'fwd'
-                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
-                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
-            }`}>
+            <span className="px-2 py-0.5 rounded text-xs bg-white/80 text-gray-700 shadow-xs">
               {widget.type === 'fwd' ? '合集' : '模块'}
             </span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+          <p className="text-sm text-gray-600 truncate">
             {widget.description}
           </p>
         </div>
-
-        {/* 导入按钮 */}
-        <ImportButton widget={widget} className="px-4 py-2 text-sm" />
+        {/* 导入按钮 - 蓝色渐变 */}
+        <ImportButton 
+          widget={widget} 
+          className="px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-md hover:shadow-lg transition-all"
+        />
       </div>
     );
   }
 
   // 网格视图
   return (
-    <div className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300">
+    <div 
+      className="group relative rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-current/25 transition-all duration-300 border border-gray-200/60"
+      style={{
+        backgroundColor: `${randomIosColor}85`, // 85%透明度，让彩色更明显
+        backdropFilter: 'blur(12px)',
+      }}
+    >
       {/* 预览区域 */}
-      <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-grid-gray-200 dark:bg-grid-gray-800 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-
-        {/* 动态背景 */}
+      <div className="relative h-48 flex items-center justify-center overflow-hidden">
+        {/* 深色网格纹理，在浅色背景上更明显 */}
+        <div className="absolute inset-0"
+             style={{
+               backgroundImage: `linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+                                 linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)`,
+               backgroundSize: '24px 24px',
+             }}
+        />
+        {/* 动态背景效果 */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20 animate-gradient" />
         </div>
-
         {/* 图标 */}
-        <div className="relative z-10 w-20 h-20 bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-          <Icon className="w-10 h-10 text-gray-700 dark:text-gray-200" />
+        <div className="relative z-10 w-20 h-20 bg-white/80 rounded-2xl shadow-md flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 backdrop-blur-sm">
+          <Icon className="w-10 h-10 text-gray-700" />
         </div>
-
         {/* 类型标签 */}
-        <span className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium ${
-          widget.type === 'fwd'
-            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
-            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
-        }`}>
+        <span className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium bg-white/80 text-gray-700 backdrop-blur-xs shadow-xs">
           {widget.type === 'fwd' ? '模块合集' : '模块'}
         </span>
-
         {/* 文件类型图标 */}
-        <span className="absolute top-4 right-4 w-8 h-8 bg-black/5 dark:bg-white/10 rounded-lg flex items-center justify-center">
+        <span className="absolute top-4 right-4 w-8 h-8 bg-white/60 rounded-lg flex items-center justify-center backdrop-blur-sm shadow-xs">
           {widget.type === 'fwd' ? (
-            <FileJson className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <FileJson className="w-4 h-4 text-gray-700" />
           ) : (
-            <Code className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <Code className="w-4 h-4 text-gray-700" />
           )}
         </span>
       </div>
-
       {/* 内容 */}
       <div className="p-6">
         <div className="flex items-start justify-between mb-2">
-          <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">
-            {widget.name} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">v{widget.version}</span>
+          <h3 className="font-bold text-lg text-gray-800 line-clamp-1">
+            {widget.name} <span className="text-sm font-normal text-gray-600">v{widget.version}</span>
           </h3>
         </div>
-
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 h-10">
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2 h-10">
           {widget.description}
         </p>
-
-        {/* 导入按钮 - 全宽，无查看源码按钮 */}
-        <ImportButton widget={widget} className="w-full" />
+        {/* 导入按钮 - 蓝色渐变，增强视觉效果 */}
+        <ImportButton 
+          widget={widget} 
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all"
+        />
       </div>
     </div>
   );
