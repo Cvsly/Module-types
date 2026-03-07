@@ -1,4 +1,3 @@
-cat > /home/user/.super_doubao/super-doubao-runtime/workspace/Module-types/components/WidgetCard.tsx << 'EOF'
 import { WidgetConfig } from '@/types/widget';
 import { ImportButton } from './ImportButton';
 import {
@@ -38,7 +37,7 @@ export function WidgetCard({ widget, viewMode = 'grid' }: WidgetCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-              {widget.name} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">v{widget.version}</span>
+              {widget.name}
             </h3>
             <span className={`px-2 py-0.5 rounded text-xs ${
               widget.type === 'fwd'
@@ -51,6 +50,9 @@ export function WidgetCard({ widget, viewMode = 'grid' }: WidgetCardProps) {
           <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
             {widget.description}
           </p>
+          <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+            <span>v{widget.version}</span>
+          </div>
         </div>
 
         {/* 导入按钮 */}
@@ -99,7 +101,7 @@ export function WidgetCard({ widget, viewMode = 'grid' }: WidgetCardProps) {
       <div className="p-6">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">
-            {widget.name} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">v{widget.version}</span>
+            {widget.name}
           </h3>
         </div>
 
@@ -107,10 +109,14 @@ export function WidgetCard({ widget, viewMode = 'grid' }: WidgetCardProps) {
           {widget.description}
         </p>
 
+        {/* 文件信息 - 只保留版本号 */}
+        <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 mb-4 p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+          <span>v{widget.version}</span>
+        </div>
+
         {/* 导入按钮 - 全宽，无查看源码按钮 */}
         <ImportButton widget={widget} className="w-full" />
       </div>
     </div>
   );
 }
-EOF
